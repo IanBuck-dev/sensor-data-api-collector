@@ -3,7 +3,12 @@ Console.WriteLine("Hello, World!");
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add config for connectors (auth, interval etc.)
+
 // Add services
+// Todo: Configure http client and add 
+
+
 // Add recurring jobs as workers
 
 var app = builder.Build();
