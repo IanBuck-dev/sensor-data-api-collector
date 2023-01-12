@@ -17,7 +17,6 @@ public class SensorCommunityService : BackgroundService
     {
         _httpClient = httpClient;
 
-        // Todo: configure user-agent
         _httpClient.DefaultRequestHeaders.Add("User-Agent", HttpUtility.UrlEncode("Heat-Islands Detection Uni Hamburg 6buck@informatik.uni-hamburg.de"));
 
         _options = new JsonSerializerOptions();
