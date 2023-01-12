@@ -1,8 +1,8 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
 using SensorData.Api.Collector.Models;
-using SensorData.Api.Collector.Services;
 
 namespace SensorData.Api.Collector.Connectors.Sensor.Community;
 
@@ -23,7 +23,7 @@ public class SensorCommunityService : BackgroundService
         _options = new JsonSerializerOptions();
         _options.PropertyNameCaseInsensitive = true;
         _options.Converters.Add(new DateTimeConverterUsingDateTimeParse());
-        // _options.Converters.Add(new DoubleConverterUsingDoubleParse());
+        _options.Converters.Add(new DecimalConverterUsingDoubleParse());
     }
 
     public async Task GetSensorReadings(object state)
@@ -67,8 +67,8 @@ public class SensorCommunityService : BackgroundService
         // Tostedt: 53.27786506750316, 9.669322484225408
 
         return r.Location != null && r.Location.Country == "DE" && r.Location.Indoor == 0
-             && decimal.Parse(r.Location.Latitude) <= 53.8m && decimal.Parse(r.Location.Latitude) >= 53.2m
-             && decimal.Parse(r.Location.Longitude) <= 10.4m && decimal.Parse(r.Location.Longitude) >= 9.6m;
+             && r.Location.Latitude <= 53.8m && r.Location.Latitude >= 53.2m
+             && r.Location.Longitude <= 10.4m && r.Location.Longitude >= 9.6m;
     }
 
     private bool SensorFilter(SCSensorReading r)
@@ -95,9 +95,9 @@ public record SCSensorReading
         {
             Location = new Location()
             {
-                Latitude = decimal.Parse(Location.Latitude),
-                Longitude = decimal.Parse(Location.Longitude),
-                Altitude = decimal.Parse(Location.Altitude)
+                Latitude = Location.Latitude ?? default,
+                Longitude = Location.Longitude ?? default,
+                Altitude = Location.Altitude ?? default
             }
         };
 
@@ -124,9 +124,15 @@ public record SCSensorReading
 public record SCLocation
 {
     public long Id { get; set; }
-    public string Latitude { get; set; }
-    public string Longitude { get; set; }
-    public string Altitude { get; set; }
+
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public decimal? Latitude { get; set; }
+
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public decimal? Longitude { get; set; }
+
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public decimal? Altitude { get; set; }
     public string Country { get; set; }
 
     [JsonPropertyName("exact_location")]
@@ -177,17 +183,19 @@ public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
     }
 }
 
-public class DoubleConverterUsingDoubleParse : JsonConverter<double>
+public class DecimalConverterUsingDoubleParse : JsonConverter<decimal>
 {
-    public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (double.TryParse(reader.GetString() ?? string.Empty, out var result))
+        var input = reader.GetString() ?? string.Empty;
+
+        if (decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             return result;
 
         return default;
     }
 
-    public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }
