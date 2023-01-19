@@ -1,23 +1,4 @@
-﻿# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET-Core.yml
-
-# This is a simple example illustrating how to build and test .NET Core project
-# with GitLab Continuous Integration / Continuous Delivery.
-#
-# ### Specify the Docker image
-#
-# Instead of installing .NET Core SDK manually, a docker image is used
-# with already pre-installed .NET Core SDK.
-#
-# The 'latest' tag targets the latest available version of .NET Core SDK image.
-# If preferred, you can explicitly specify version of .NET Core (e.g. using '2.2-sdk' tag).
-#
-# See other available tags for .NET Core: https://hub.docker.com/r/microsoft/dotnet
-# Learn more about Docker tags: https://docs.docker.com/glossary/?term=tag
-# and the Docker itself: https://opensource.com/resources/what-docker
-image: mcr.microsoft.com/dotnet/sdk:6.0
+image: mcr.microsoft.com/dotnet/sdk:7.0
 
 # ### Define variables
 #
@@ -89,26 +70,12 @@ before_script:
 build:
   stage: build
   # ### Build all projects discovered from solution file.
-  #
-  # Note: this will fail if you have any projects in your solution that are not
-  # .NET Core-based projects (e.g. WCF service), which is based on .NET Framework,
-  # not .NET Core. In this scenario, you will need to build every .NET Core-based
-  # project by explicitly specifying a relative path to the directory
-  # where it is located (e.g. 'dotnet build ./src/ConsoleApp').
-  # Only one project path can be passed as a parameter to 'dotnet build' command.
   script:
     - 'dotnet build --no-restore'
 
 # not needed yet
-# tests:
-#   stage: test
-#   # ### Run the tests
-#   #
-#   # You can either run tests for all test projects that are defined in your solution
-#   # with 'dotnet test' or run tests only for specific project by specifying
-#   # a relative path to the directory where it is located (e.g. 'dotnet test ./test/UnitTests').
-#   #
-#   # You may want to define separate testing jobs for different types of testing
-#   # (e.g. integration tests, unit tests etc).
-#   script:
-#     - 'dotnet test --no-restore'
+test:
+  stage: test
+  # ### Run the tests
+  script:
+    - 'dotnet test --no-restore'

@@ -1,0 +1,868 @@
+{
+    "status": "ok",
+    "time_server": 1673963580,
+    "body": [
+        {
+            "_id": "70:ee:50:01:47:34",
+            "place": {
+                "location": [
+                    10.165765,
+                    53.50988
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 24,
+                "city": "Hamburg",
+                "street": "Am Heesen"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:70:3a:ae": {
+                    "res": {
+                        "1673963414": [
+                            4.5,
+                            74
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:01:47:34": {
+                    "res": {
+                        "1673963444": [
+                            988.2
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                }
+            },
+            "modules": [
+                "02:00:00:70:3a:ae"
+            ],
+            "module_types": {
+                "02:00:00:70:3a:ae": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:5f:51:a0",
+            "place": {
+                "location": [
+                    10.1623932,
+                    53.5149613
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 28,
+                "city": "Hamburg",
+                "street": "Am Langberg"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:5e:d9:5e": {
+                    "res": {
+                        "1673963493": [
+                            4.1,
+                            75
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:5f:51:a0": {
+                    "res": {
+                        "1673963495": [
+                            984.5
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:06:d3:76": {
+                    "rain_60min": 0,
+                    "rain_24h": 2.9290000000000003,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963486
+                },
+                "06:00:00:04:ef:f0": {
+                    "wind_strength": 11,
+                    "wind_angle": 237,
+                    "gust_strength": 27,
+                    "gust_angle": 226,
+                    "wind_timeutc": 1673963493
+                }
+            },
+            "modules": [
+                "02:00:00:5e:d9:5e",
+                "05:00:00:06:d3:76",
+                "06:00:00:04:ef:f0"
+            ],
+            "module_types": {
+                "02:00:00:5e:d9:5e": "NAModule1",
+                "05:00:00:06:d3:76": "NAModule3",
+                "06:00:00:04:ef:f0": "NAModule2"
+            }
+        },
+        {
+            "_id": "70:ee:50:03:da:4c",
+            "place": {
+                "location": [
+                    10.1670769999999,
+                    53.523671999723
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 23,
+                "city": "Oststeinbek",
+                "street": "Dorfstraße"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:03:df:42": {
+                    "res": {
+                        "1673962977": [
+                            5,
+                            75
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:03:da:4c": {
+                    "res": {
+                        "1673963021": [
+                            984.2
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:00:3d:cc": {
+                    "rain_60min": 0,
+                    "rain_24h": 2.323,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963015
+                }
+            },
+            "modules": [
+                "02:00:00:03:df:42",
+                "05:00:00:00:3d:cc"
+            ],
+            "module_types": {
+                "02:00:00:03:df:42": "NAModule1",
+                "05:00:00:00:3d:cc": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:84:0a:0a",
+            "place": {
+                "location": [
+                    10.172421,
+                    53.523059
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 31,
+                "city": "Havighorst",
+                "street": "Vossredder"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:83:f6:1e": {
+                    "res": {
+                        "1673963242": [
+                            5,
+                            72
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:84:0a:0a": {
+                    "res": {
+                        "1673963247": [
+                            983.9
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:0a:09:60": {
+                    "rain_60min": 0,
+                    "rain_24h": 2.4240000000000004,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963236
+                },
+                "06:00:00:06:67:68": {
+                    "wind_strength": 3,
+                    "wind_angle": 244,
+                    "gust_strength": 10,
+                    "gust_angle": 11,
+                    "wind_timeutc": 1673963242
+                }
+            },
+            "modules": [
+                "02:00:00:83:f6:1e",
+                "06:00:00:06:67:68",
+                "05:00:00:0a:09:60"
+            ],
+            "module_types": {
+                "02:00:00:83:f6:1e": "NAModule1",
+                "06:00:00:06:67:68": "NAModule2",
+                "05:00:00:0a:09:60": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:58:6c:b6",
+            "place": {
+                "location": [
+                    10.1748380661011,
+                    53.5024223327637
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 3,
+                "city": "Hamburg",
+                "street": "Auf der Bojewiese"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:58:ab:ec": {
+                    "res": {
+                        "1673963009": [
+                            4.3,
+                            77
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:58:6c:b6": {
+                    "res": {
+                        "1673963048": [
+                            985.6
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:05:d4:e6": {
+                    "rain_60min": 0,
+                    "rain_24h": 2.6260000000000003,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963047
+                },
+                "06:00:00:03:57:54": {
+                    "wind_strength": 5,
+                    "wind_angle": 359,
+                    "gust_strength": 15,
+                    "gust_angle": 359,
+                    "wind_timeutc": 1673963047
+                }
+            },
+            "modules": [
+                "02:00:00:58:ab:ec",
+                "06:00:00:03:57:54",
+                "05:00:00:05:d4:e6"
+            ],
+            "module_types": {
+                "02:00:00:58:ab:ec": "NAModule1",
+                "06:00:00:03:57:54": "NAModule2",
+                "05:00:00:05:d4:e6": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:2c:fe:66",
+            "place": {
+                "location": [
+                    10.194887,
+                    53.500776
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 37,
+                "city": "Hamburg",
+                "street": "Richard-Linde-Weg"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:2c:ab:62": {
+                    "res": {
+                        "1673963305": [
+                            4.4,
+                            78
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:2c:fe:66": {
+                    "res": {
+                        "1673963321": [
+                            980.6
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                }
+            },
+            "modules": [
+                "02:00:00:2c:ab:62"
+            ],
+            "module_types": {
+                "02:00:00:2c:ab:62": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:01:b0:08",
+            "place": {
+                "location": [
+                    10.234251,
+                    53.509247
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 34,
+                "city": "Reinbek",
+                "street": "Am Holländerberg"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:70:4c:a4": {
+                    "res": {
+                        "1673963091": [
+                            5.9,
+                            67
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:01:b0:08": {
+                    "res": {
+                        "1673963125": [
+                            986.2
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                }
+            },
+            "modules": [
+                "02:00:00:70:4c:a4"
+            ],
+            "module_types": {
+                "02:00:00:70:4c:a4": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:1f:58:7c",
+            "place": {
+                "location": [
+                    10.2362642288208,
+                    53.519588470459
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 37,
+                "city": "Stormarn",
+                "street": "Gergenbusch"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:1f:6f:ea": {
+                    "res": {
+                        "1673963355": [
+                            3.8,
+                            83
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:1f:58:7c": {
+                    "res": {
+                        "1673963385": [
+                            983
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:08:18:74": {
+                    "rain_60min": 0,
+                    "rain_24h": 3.333,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963381
+                }
+            },
+            "modules": [
+                "02:00:00:1f:6f:ea",
+                "05:00:00:08:18:74"
+            ],
+            "module_types": {
+                "02:00:00:1f:6f:ea": "NAModule1",
+                "05:00:00:08:18:74": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:04:ca:64",
+            "place": {
+                "location": [
+                    10.256403,
+                    53.501053
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 42,
+                "city": "Wentorf bei Hamburg",
+                "street": "Waldweg"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:04:be:b4": {
+                    "res": {
+                        "1673963359": [
+                            3.9,
+                            79
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:04:ca:64": {
+                    "res": {
+                        "1673963371": [
+                            979
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:00:79:12": {
+                    "rain_60min": 0,
+                    "rain_24h": 3.333,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963359
+                }
+            },
+            "modules": [
+                "02:00:00:04:be:b4",
+                "05:00:00:00:79:12"
+            ],
+            "module_types": {
+                "02:00:00:04:be:b4": "NAModule1",
+                "05:00:00:00:79:12": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:32:e0:1a",
+            "place": {
+                "location": [
+                    10.281741,
+                    53.52318
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 25,
+                "city": "Wohltorf",
+                "street": "Obere Lindenstraße"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:32:bc:dc": {
+                    "res": {
+                        "1673962965": [
+                            4.1,
+                            74
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:32:e0:1a": {
+                    "res": {
+                        "1673962998": [
+                            759.2
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:04:9f:8a": {
+                    "rain_60min": 0,
+                    "rain_24h": 4.343,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673962997
+                },
+                "06:00:00:02:e5:a0": {
+                    "wind_strength": 11,
+                    "wind_angle": 359,
+                    "gust_strength": 16,
+                    "gust_angle": 359,
+                    "wind_timeutc": 1673962997
+                }
+            },
+            "modules": [
+                "05:00:00:04:9f:8a",
+                "06:00:00:02:e5:a0",
+                "02:00:00:32:bc:dc"
+            ],
+            "module_types": {
+                "05:00:00:04:9f:8a": "NAModule3",
+                "06:00:00:02:e5:a0": "NAModule2",
+                "02:00:00:32:bc:dc": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:2b:65:a6",
+            "place": {
+                "location": [
+                    10.289822,
+                    53.514115
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 23,
+                "city": "Wohltorf",
+                "street": "Dorfstraße"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:2a:f9:44": {
+                    "res": {
+                        "1673963224": [
+                            3.5,
+                            92
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:2b:65:a6": {
+                    "res": {
+                        "1673963241": [
+                            988.4
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:04:1d:9c": {
+                    "rain_60min": 0,
+                    "rain_24h": 4.04,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963237
+                },
+                "06:00:00:02:50:5e": {
+                    "wind_strength": 4,
+                    "wind_angle": 270,
+                    "gust_strength": 10,
+                    "gust_angle": 359,
+                    "wind_timeutc": 1673963237
+                }
+            },
+            "modules": [
+                "02:00:00:2a:f9:44",
+                "05:00:00:04:1d:9c",
+                "06:00:00:02:50:5e"
+            ],
+            "module_types": {
+                "02:00:00:2a:f9:44": "NAModule1",
+                "05:00:00:04:1d:9c": "NAModule3",
+                "06:00:00:02:50:5e": "NAModule2"
+            }
+        },
+        {
+            "_id": "70:ee:50:1e:33:36",
+            "place": {
+                "location": [
+                    10.291661,
+                    53.518499
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 32,
+                "city": "Wohltorf",
+                "street": "Dorfstraße"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:63:41:16": {
+                    "res": {
+                        "1673963082": [
+                            4.4,
+                            75
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:1e:33:36": {
+                    "res": {
+                        "1673963117": [
+                            987.1
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:07:22:6e": {
+                    "rain_60min": 0,
+                    "rain_24h": 3.434,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963114
+                }
+            },
+            "modules": [
+                "05:00:00:07:22:6e",
+                "02:00:00:63:41:16"
+            ],
+            "module_types": {
+                "05:00:00:07:22:6e": "NAModule3",
+                "02:00:00:63:41:16": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:7f:f7:9e",
+            "place": {
+                "location": [
+                    10.329143,
+                    53.523487
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 52,
+                "city": "Friedrichsruh",
+                "street": "Eichhörnchenweg"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:7f:f1:72": {
+                    "res": {
+                        "1673963525": [
+                            3.4,
+                            83
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:7f:f7:9e": {
+                    "res": {
+                        "1673963548": [
+                            985.1
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                }
+            },
+            "modules": [
+                "02:00:00:7f:f1:72"
+            ],
+            "module_types": {
+                "02:00:00:7f:f1:72": "NAModule1"
+            }
+        },
+        {
+            "_id": "70:ee:50:6b:95:16",
+            "place": {
+                "location": [
+                    10.4630657,
+                    53.4985827
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 46,
+                "city": "Herzogtum Lauenburg",
+                "street": "Alter Forsthof"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:6b:7f:e8": {
+                    "res": {
+                        "1673963467": [
+                            4.2,
+                            78
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:6b:95:16": {
+                    "res": {
+                        "1673963490": [
+                            985.2
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:0a:0f:96": {
+                    "rain_60min": 0,
+                    "rain_24h": 3.737,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673963486
+                },
+                "06:00:00:06:6f:c4": {
+                    "wind_strength": 5,
+                    "wind_angle": 220,
+                    "gust_strength": 14,
+                    "gust_angle": 196,
+                    "wind_timeutc": 1673963486
+                }
+            },
+            "modules": [
+                "02:00:00:6b:7f:e8",
+                "05:00:00:0a:0f:96",
+                "06:00:00:06:6f:c4"
+            ],
+            "module_types": {
+                "02:00:00:6b:7f:e8": "NAModule1",
+                "05:00:00:0a:0f:96": "NAModule3",
+                "06:00:00:06:6f:c4": "NAModule2"
+            }
+        },
+        {
+            "_id": "70:ee:50:20:ba:c2",
+            "place": {
+                "location": [
+                    10.472413,
+                    53.501511
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 40,
+                "city": "Herzogtum Lauenburg",
+                "street": "Hamburger Straße"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:06:78:0c": {
+                    "res": {
+                        "1673962934": [
+                            4.9,
+                            72
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:20:ba:c2": {
+                    "res": {
+                        "1673962974": [
+                            999.7
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                },
+                "05:00:00:08:99:fc": {
+                    "rain_60min": 0,
+                    "rain_24h": 2.222,
+                    "rain_live": 0,
+                    "rain_timeutc": 1673962973
+                }
+            },
+            "modules": [
+                "02:00:00:06:78:0c",
+                "05:00:00:08:99:fc"
+            ],
+            "module_types": {
+                "02:00:00:06:78:0c": "NAModule1",
+                "05:00:00:08:99:fc": "NAModule3"
+            }
+        },
+        {
+            "_id": "70:ee:50:80:00:02",
+            "place": {
+                "location": [
+                    10.479608,
+                    53.511358
+                ],
+                "timezone": "Europe/Berlin",
+                "country": "DE",
+                "altitude": 50,
+                "city": "Herzogtum Lauenburg",
+                "street": "Carl-Maria-von-Weber-Ring"
+            },
+            "mark": 10,
+            "measures": {
+                "02:00:00:80:14:9c": {
+                    "res": {
+                        "1673963227": [
+                            4.3,
+                            93
+                        ]
+                    },
+                    "type": [
+                        "temperature",
+                        "humidity"
+                    ]
+                },
+                "70:ee:50:80:00:02": {
+                    "res": {
+                        "1673963236": [
+                            985.9
+                        ]
+                    },
+                    "type": [
+                        "pressure"
+                    ]
+                }
+            },
+            "modules": [
+                "02:00:00:80:14:9c"
+            ],
+            "module_types": {
+                "02:00:00:80:14:9c": "NAModule1"
+            }
+        }
+    ]
+}

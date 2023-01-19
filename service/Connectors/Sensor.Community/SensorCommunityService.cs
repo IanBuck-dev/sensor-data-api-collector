@@ -2,7 +2,10 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using MongoDB.Bson;
+using MongoDB.Driver.GeoJsonObjectModel;
 using SensorData.Api.Collector.Models;
+using SensorData.Api.Collector.Services;
 
 namespace SensorData.Api.Collector.Connectors.Sensor.Community;
 
@@ -10,19 +13,20 @@ public class SensorCommunityService : BackgroundService
 {
     private const string BaseUrl = "https://data.sensor.community/static/v2/data.json";
     private readonly HttpClient _httpClient;
+    private readonly MongoWrapper _mongoClient;
     private readonly JsonSerializerOptions _options;
     private Timer? _timer = null;
 
-    public SensorCommunityService(HttpClient httpClient)
+    public SensorCommunityService(HttpClient httpClient, MongoWrapper mongoClient)
     {
         _httpClient = httpClient;
-
+        _mongoClient = mongoClient;
         _httpClient.DefaultRequestHeaders.Add("User-Agent", HttpUtility.UrlEncode("Heat-Islands Detection Uni Hamburg 6buck@informatik.uni-hamburg.de"));
 
         _options = new JsonSerializerOptions();
         _options.PropertyNameCaseInsensitive = true;
         _options.Converters.Add(new DateTimeConverterUsingDateTimeParse());
-        _options.Converters.Add(new DecimalConverterUsingDoubleParse());
+        _options.Converters.Add(new DecimalConverterUsingDecimalParse());
     }
 
     public async Task GetSensorReadings(object state)
@@ -39,15 +43,16 @@ public class SensorCommunityService : BackgroundService
 
         // Filter out everything we don't need
         var readingsToSave = readings.Where(r => LocationFilter(r) && SensorFilter(r)).ToList();
-        var readingsToReturn = new List<SensorDataReading>(readingsToSave.Count);
-
-        // Todo: Save readings to the DB
-        Console.WriteLine($"Readings from {DateTime.UtcNow.ToString("s")}");
+        var readingsToReturn = new List<MongoDbTimeSeriesReading>(readingsToSave.Count);
 
         foreach (var item in readingsToSave)
         {
-            readingsToReturn.Add(item.ToSensorDataReading());
-            Console.WriteLine(item);
+            readingsToReturn.Add(item.ToMongoDbTimeSeriesReading());
+        }
+
+        if (readingsToReturn.Any())
+        {
+            await _mongoClient.SaveSensorReadings(readingsToReturn);
         }
     }
 
@@ -72,8 +77,8 @@ public class SensorCommunityService : BackgroundService
 
     private bool SensorFilter(SCSensorReading r)
     {
-        return true;
-        // return r.Sensor != null && r.Sensor.SensorType != null && r.Sensor.SensorType.Name == "SDS011";
+        return r.Sensor != null && r.Sensor.SensorType != null && (r.Sensor.SensorType.Name == "BME280" || r.Sensor.SensorType.Name != "DHT22")
+            && r.SensorDataValues != null && r.SensorDataValues.Any(x => x.ValueType == "temperature" || x.ValueType == "pressure" || x.ValueType == "humidity");
     }
 }
 
@@ -88,35 +93,47 @@ public record SCSensorReading
     public SCSensor Sensor { get; set; }
     public List<SCSensorDataReading> SensorDataValues { get; set; }
 
-    public SensorDataReading ToSensorDataReading()
+    public MongoDbTimeSeriesReading ToMongoDbTimeSeriesReading()
     {
-        var reading = new SensorDataReading()
+        var sensorReading = new MongoDbTimeSeriesReading()
         {
-            Location = new Location()
+            Id = ObjectId.GenerateNewId().ToString(),
+            Timestamp = Timestamp,
+            Metadata = new MongoDbMetaData()
             {
-                Latitude = Location.Latitude ?? default,
-                Longitude = Location.Longitude ?? default,
-                Altitude = Location.Altitude ?? default
+                Provider = "sensor.community",
+                Location = new(new GeoJson3DCoordinates(
+                    (double?)Location.Longitude ?? default,
+                    (double?)Location.Latitude ?? default,
+                    (double?)Location.Altitude ?? default)),
+                SensorCommunitySensorType = Sensor.SensorType.Name
             }
         };
 
-        // Map temperature readings.
-        if (Sensor.SensorType.Name == "BME280")
-        {
-            var temperatureDataReading = SensorDataValues.FirstOrDefault(s => s.ValueType == "temperature");
+        
+        var temperatureDataReading = SensorDataValues.FirstOrDefault(s => s.ValueType == "temperature");
 
-            if (temperatureDataReading != null && double.TryParse(temperatureDataReading.Value.ToString(), out var parsedTempReading))
-            {
-                reading.Temperature = new TemperatureReading()
-                {
-                    Value = parsedTempReading,
-                    Measurement = "Celsius",
-                    SensorType = "BME280"
-                };
-            }
+        if (temperatureDataReading != null && double.TryParse(temperatureDataReading.Value.ToString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsedTempReading))
+        {
+            sensorReading.Temperature = parsedTempReading;
         }
 
-        return reading;
+        var pressureDataReading = SensorDataValues.FirstOrDefault(s => s.ValueType == "pressure");
+
+        if (pressureDataReading != null && double.TryParse(pressureDataReading.Value.ToString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsedPressureDataReading))
+        {
+            // need to devide by 100 to be milliBar
+            sensorReading.Pressure = parsedPressureDataReading / 100;
+        }
+
+        var humidityDataReading = SensorDataValues.FirstOrDefault(s => s.ValueType == "humidity");
+
+        if (humidityDataReading != null && double.TryParse(humidityDataReading.Value.ToString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsedHumidityDataReading))
+        {
+            sensorReading.Humidity = parsedHumidityDataReading;
+        }
+
+        return sensorReading;
     }
 }
 
@@ -173,19 +190,39 @@ public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return DateTime.Parse(reader.GetString() ?? string.Empty);
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            return DateTime.Parse(reader.GetString() ?? string.Empty);
+        }
+        else if (reader.TokenType == JsonTokenType.Number)
+        {
+            if (reader.TryGetInt64(out var time))
+            {
+                // if 'IsFormatInSeconds' is unspecified, then deduce the correct type based on whether it can be represented in the allowed .net DateTime range
+                if (time >= _unixMinSeconds && time < _unixMaxSeconds)
+                    return DateTimeOffset.FromUnixTimeSeconds(time).LocalDateTime;
+                return DateTimeOffset.FromUnixTimeMilliseconds(time).LocalDateTime;
+            }
+        }
+
+        return default;
     }
 
-    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToString());
-    }
+    private static readonly long _unixMinSeconds = DateTimeOffset.MinValue.ToUnixTimeSeconds() - DateTimeOffset.UnixEpoch.ToUnixTimeSeconds(); // -62_135_596_800
+    private static readonly long _unixMaxSeconds = DateTimeOffset.MaxValue.ToUnixTimeSeconds() - DateTimeOffset.UnixEpoch.ToUnixTimeSeconds(); // 253_402_300_799
+
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) => throw new NotSupportedException();
 }
 
-public class DecimalConverterUsingDoubleParse : JsonConverter<decimal>
+public class DecimalConverterUsingDecimalParse : JsonConverter<decimal>
 {
     public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return reader.GetDecimal();
+        }
+
         var input = reader.GetString() ?? string.Empty;
 
         if (decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
