@@ -5,9 +5,10 @@ using System.Web;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
+using SensorData.Api.Collector.Connectors.Sensor.Community;
 using SensorData.Api.Collector.Services;
 
-namespace SensorData.Api.Collector.Connectors.Sensor.Community;
+namespace SensorData.Api.Collector.Connectors.Netatmo;
 
 public class NetatmoService : BackgroundService
 {
@@ -20,13 +21,15 @@ public class NetatmoService : BackgroundService
     private const string RefreshUrl = "https://api.netatmo.com/oauth2/token";
     private readonly HttpClient _httpClient;
     private readonly MongoWrapper _mongoClient;
+    private readonly ILogger<NetatmoService> _logger;
     private readonly JsonSerializerOptions _options;
     private Timer? _timer = null;
 
-    public NetatmoService(HttpClient httpClient, MongoWrapper mongoClient)
+    public NetatmoService(HttpClient httpClient, MongoWrapper mongoClient, ILogger<NetatmoService> logger)
     {
         _httpClient = httpClient;
         _mongoClient = mongoClient;
+        _logger = logger;
         _httpClient.DefaultRequestHeaders.Add("User-Agent", HttpUtility.UrlEncode("Heat-Islands Detection Uni Hamburg 6buck@informatik.uni-hamburg.de"));
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {NetatmoAccessToken}");
 
@@ -36,61 +39,76 @@ public class NetatmoService : BackgroundService
         _options.Converters.Add(new DecimalConverterUsingDecimalParse());
     }
 
-    public async Task GetSensorReadings(object state)
-    {
-        if (state is not TimerContext ctx)
-            return;
-
-        // Get result from api.
-        // Includes all sensor readings of all sensors averaged over the last 5 min.
-        var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
-
-        var response = await _httpClient.SendAsync(request);
-
-        if (response.StatusCode == HttpStatusCode.BadRequest)
-        {
-            // Refresh access token.
-            var refreshUrl = $"{RefreshUrl}?grant_type=refresh_token&refresh_token={NetatmoRefreshToken}&client_id={NetatmoClientId}&client_secret={NetatmoClientSecret}";
-            var refreshRequest = new HttpRequestMessage(HttpMethod.Post, refreshUrl);
-
-            var refreshResponse = await _httpClient.SendAsync(refreshRequest);
-
-            if (refreshResponse.IsSuccessStatusCode)
-            {
-                var refreshResult = await refreshResponse.Content.ReadFromJsonAsync<NetatmoRefreshResponse>();
-
-                NetatmoAccessToken = refreshResult.AccessToken;
-                NetatmoRefreshToken = refreshResult.RefreshToken;
-                ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn);
-
-                request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
-                response = await _httpClient.SendAsync(request);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception("Failed to fetch netatmo data dispite access token refresh.");
-                }
-            }
-        }
-
-        var netatmoResult = await response.Content.ReadFromJsonAsync<NetatmoApiResponse>(_options);
-
-        // Todo: Save readings to the DB
-        Console.WriteLine($"Readings from {DateTime.UtcNow.ToString("s")}");
-
-        var sensorReadings = netatmoResult.ToMongoSensorReadings();
-
-        if (sensorReadings != null && sensorReadings.Any())
-        {
-           await _mongoClient.SaveSensorReadings(sensorReadings); 
-        }
-    }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _timer = new Timer(async state => await GetSensorReadings(state), new TimerContext { Token = stoppingToken }, 0, (int)TimeSpan.FromMinutes(5).TotalMilliseconds);
 
         return Task.CompletedTask;
+    }
+
+    public async Task GetSensorReadings(object state)
+    {
+        if (state is not TimerContext ctx)
+            return;
+
+        try
+        {
+            // Get result from api.
+            // Includes all sensor readings of all sensors averaged over the last 5 min.
+            var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // Refresh access token.
+                var refreshUrl = $"{RefreshUrl}?grant_type=refresh_token&refresh_token={NetatmoRefreshToken}&client_id={NetatmoClientId}&client_secret={NetatmoClientSecret}";
+                var refreshRequest = new HttpRequestMessage(HttpMethod.Post, refreshUrl);
+
+                var refreshResponse = await _httpClient.SendAsync(refreshRequest);
+
+                if (refreshResponse.IsSuccessStatusCode)
+                {
+                    var refreshResult = await refreshResponse.Content.ReadFromJsonAsync<NetatmoRefreshResponse>();
+
+                    NetatmoAccessToken = refreshResult.AccessToken;
+                    NetatmoRefreshToken = refreshResult.RefreshToken;
+                    ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn);
+
+                    request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
+                    response = await _httpClient.SendAsync(request);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new Exception("Failed to fetch netatmo data dispite access token refresh.");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Failed to refresh access token for netatmo.");
+                }
+            }
+
+            var netatmoResult = await response.Content.ReadFromJsonAsync<NetatmoApiResponse>(_options);
+
+            var sensorReadings = netatmoResult.ToMongoSensorReadings();
+
+            _logger.LogInformation("Created {Count} sensor readings from netatmo.", sensorReadings.Count());
+
+            if (sensorReadings != null && sensorReadings.Any())
+            {
+                await _mongoClient.SaveSensorReadings(sensorReadings);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Do not log exception on shutdown.
+            if (ex is OperationCanceledException)
+                throw;
+
+            // Do not throw exceptions to keep the hosted service running.
+            _logger.LogError(ex, "Error while processing sensor readings for netatmo collector.");
+        }
     }
 }
 
@@ -174,7 +192,7 @@ public record NetatmoApiResponse
                                 }
                                 else if (type == "pressure")
                                 {
-                                   sensorReading.Pressure = value;
+                                    sensorReading.Pressure = value;
                                 }
                             }
                         }

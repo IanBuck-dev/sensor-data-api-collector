@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using FluentAssertions;
 using SensorData.Api.Collector.Connectors.Sensor.Community;
-using SensorData.Api.Collector.Services;
 
 namespace tests.Connectors;
 

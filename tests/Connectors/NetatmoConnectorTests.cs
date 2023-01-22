@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using FluentAssertions;
+using SensorData.Api.Collector.Connectors.Netatmo;
 using SensorData.Api.Collector.Connectors.Sensor.Community;
 
 namespace tests.Connectors;
