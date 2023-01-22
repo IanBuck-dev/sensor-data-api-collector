@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using System.Web;
 using MongoDB.Bson;
 using MongoDB.Driver.GeoJsonObjectModel;
-using SensorData.Api.Collector.Models;
 using SensorData.Api.Collector.Services;
 
 namespace SensorData.Api.Collector.Connectors.Sensor.Community;
@@ -14,13 +13,15 @@ public class SensorCommunityService : BackgroundService
     private const string BaseUrl = "https://data.sensor.community/static/v2/data.json";
     private readonly HttpClient _httpClient;
     private readonly MongoWrapper _mongoClient;
+    private readonly ILogger<SensorCommunityService> _logger;
     private readonly JsonSerializerOptions _options;
     private Timer? _timer = null;
 
-    public SensorCommunityService(HttpClient httpClient, MongoWrapper mongoClient)
+    public SensorCommunityService(HttpClient httpClient, MongoWrapper mongoClient, ILogger<SensorCommunityService> logger)
     {
         _httpClient = httpClient;
         _mongoClient = mongoClient;
+        _logger = logger;
         _httpClient.DefaultRequestHeaders.Add("User-Agent", HttpUtility.UrlEncode("Heat-Islands Detection Uni Hamburg 6buck@informatik.uni-hamburg.de"));
 
         _options = new JsonSerializerOptions();
@@ -29,38 +30,50 @@ public class SensorCommunityService : BackgroundService
         _options.Converters.Add(new DecimalConverterUsingDecimalParse());
     }
 
-    public async Task GetSensorReadings(object state)
-    {
-        if (state is not TimerContext ctx)
-            return;
-
-        // Get result from api.
-        // Includes all sensor readings of all sensors averaged over the last 5 min.
-        var result = await _httpClient.GetStringAsync(BaseUrl, ctx.Token);
-        // var result = await File.ReadAllTextAsync("readings.json");
-
-        var readings = JsonSerializer.Deserialize<List<SCSensorReading>>(result, _options);
-
-        // Filter out everything we don't need
-        var readingsToSave = readings.Where(r => LocationFilter(r) && SensorFilter(r)).ToList();
-        var readingsToReturn = new List<MongoDbTimeSeriesReading>(readingsToSave.Count);
-
-        foreach (var item in readingsToSave)
-        {
-            readingsToReturn.Add(item.ToMongoDbTimeSeriesReading());
-        }
-
-        if (readingsToReturn.Any())
-        {
-            await _mongoClient.SaveSensorReadings(readingsToReturn);
-        }
-    }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _timer = new Timer(async state => await GetSensorReadings(state), new TimerContext { Token = stoppingToken }, 0, (int)TimeSpan.FromMinutes(5).TotalMilliseconds);
 
         return Task.CompletedTask;
+    }
+
+    public async Task GetSensorReadings(object state)
+    {
+        if (state is not TimerContext ctx)
+            return;
+
+        try
+        {
+            // Get result from api.
+            // Includes all sensor readings of all sensors averaged over the last 5 min.
+            var result = await _httpClient.GetStringAsync(BaseUrl, ctx.Token);
+            // var result = await File.ReadAllTextAsync("readings.json");
+
+            var readings = JsonSerializer.Deserialize<List<SCSensorReading>>(result, _options);
+
+            // Filter out everything we don't need
+            var readingsToSave = readings.Where(r => LocationFilter(r) && SensorFilter(r)).ToList();
+            var readingsToReturn = new List<MongoDbTimeSeriesReading>(readingsToSave.Count);
+
+            foreach (var item in readingsToSave)
+            {
+                readingsToReturn.Add(item.ToMongoDbTimeSeriesReading());
+            }
+
+            if (readingsToReturn.Any())
+            {
+                await _mongoClient.SaveSensorReadings(readingsToReturn);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Do not log exception on shutdown.
+            if (ex is OperationCanceledException)
+                throw;
+
+            // Do not throw exceptions to keep the hosted service running.
+            _logger.LogError(ex, "Error while processing sensor readings for sensor community collector.");
+        }
     }
 
     private bool LocationFilter(SCSensorReading r)
@@ -110,7 +123,7 @@ public record SCSensorReading
             }
         };
 
-        
+
         var temperatureDataReading = SensorDataValues.FirstOrDefault(s => s.ValueType == "temperature");
 
         if (temperatureDataReading != null && double.TryParse(temperatureDataReading.Value.ToString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsedTempReading))

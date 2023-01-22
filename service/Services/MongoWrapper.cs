@@ -8,17 +8,21 @@ namespace SensorData.Api.Collector.Services;
 
 public class MongoWrapper
 {
+    private readonly ILogger<MongoWrapper> _logger;
     private MongoClient _client;
     private IMongoDatabase _database;
 
-    public MongoWrapper()
+    public MongoWrapper(ILogger<MongoWrapper> logger)
     {
         _client = new MongoClient(MongoConfig.MongoSettings);
         _database = _client.GetDatabase("test");
+        _logger = logger;
     }
 
     public async Task SaveSensorReadings(IEnumerable<MongoDbTimeSeriesReading> sensorReadings)
     {
+        _logger.LogInformation("Saving {Count} sensor readings to the mongo db.", sensorReadings.Count());
+
         var collection = _database.GetCollection<MongoDbTimeSeriesReading>("sensor_readings_timeseries");
 
         await collection.InsertManyAsync(sensorReadings);
