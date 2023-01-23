@@ -53,42 +53,16 @@ public class NetatmoService : BackgroundService
 
         try
         {
+            if (DateTime.UtcNow >= ExpiresIn.AddMinutes(-1))
+            {
+                await RefreshAccessToken();
+            }
+
             // Get result from api.
             // Includes all sensor readings of all sensors averaged over the last 5 min.
             var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
 
             var response = await _httpClient.SendAsync(request);
-
-            if (response.StatusCode == HttpStatusCode.BadRequest)
-            {
-                // Refresh access token.
-                var refreshUrl = $"{RefreshUrl}?grant_type=refresh_token&refresh_token={NetatmoRefreshToken}&client_id={NetatmoClientId}&client_secret={NetatmoClientSecret}";
-                var refreshRequest = new HttpRequestMessage(HttpMethod.Post, refreshUrl);
-
-                var refreshResponse = await _httpClient.SendAsync(refreshRequest);
-
-                if (refreshResponse.IsSuccessStatusCode)
-                {
-                    var refreshResult = await refreshResponse.Content.ReadFromJsonAsync<NetatmoRefreshResponse>();
-
-                    NetatmoAccessToken = refreshResult.AccessToken;
-                    NetatmoRefreshToken = refreshResult.RefreshToken;
-                    ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn);
-
-                    request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
-                    response = await _httpClient.SendAsync(request);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        throw new Exception("Failed to fetch netatmo data dispite access token refresh.");
-                    }
-                }
-                else
-                {
-                    throw new Exception("Failed to refresh access token for netatmo.");
-                }
-            }
-
             var netatmoResult = await response.Content.ReadFromJsonAsync<NetatmoApiResponse>(_options);
 
             var sensorReadings = netatmoResult.ToMongoSensorReadings();
@@ -108,6 +82,38 @@ public class NetatmoService : BackgroundService
 
             // Do not throw exceptions to keep the hosted service running.
             _logger.LogError(ex, "Error while processing sensor readings for netatmo collector.");
+        }
+    }
+
+    private async Task RefreshAccessToken()
+    {
+        // Refresh access token.
+        var urlFormEncodedBody = new List<KeyValuePair<string, string>>()
+        {
+            new("grant_type", "refresh_token"),
+            new("refresh_token", NetatmoRefreshToken),
+            new("client_id", NetatmoClientId),
+            new("client_secret", NetatmoClientSecret),
+        };
+
+        var refreshRequest = new HttpRequestMessage(HttpMethod.Post, RefreshUrl) { Content = new FormUrlEncodedContent(urlFormEncodedBody) };
+
+        var refreshResponse = await _httpClient.SendAsync(refreshRequest);
+
+        if (refreshResponse.IsSuccessStatusCode)
+        {
+            var refreshResult = await refreshResponse.Content.ReadFromJsonAsync<NetatmoRefreshResponse>();
+
+            NetatmoAccessToken = refreshResult.AccessToken;
+            NetatmoRefreshToken = refreshResult.RefreshToken;
+            ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn);
+
+            _logger.LogInformation("Successfully refreshed access token. Expires in {ExpiresIn}", ExpiresIn);
+        }
+        else
+        {
+            var responseBody = await refreshResponse.Content.ReadAsStringAsync();
+            throw new Exception($"Failed to refresh access token for netatmo. {responseBody}");
         }
     }
 }
