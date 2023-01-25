@@ -16,7 +16,7 @@ public class NetatmoService : BackgroundService
     public static string NetatmoRefreshToken { get; set; }
     public static string NetatmoClientId { get; set; }
     public static string NetatmoClientSecret { get; set; }
-    public DateTime ExpiresIn { get; set; } = DateTime.UtcNow;
+    public DateTime ExpiresIn { get; set; } = DateTime.UtcNow.AddSeconds(-30);
     private const string BaseUrl = "https://api.netatmo.com/api/getpublicdata?lat_ne=53.7960&lon_ne=10.3556&lat_sw=53.2778&lon_sw=9.6693&filter=false";
     private const string RefreshUrl = "https://api.netatmo.com/oauth2/token";
     private readonly HttpClient _httpClient;
@@ -53,7 +53,7 @@ public class NetatmoService : BackgroundService
 
         try
         {
-            if (DateTime.UtcNow >= ExpiresIn.AddMinutes(-1))
+            if (DateTime.UtcNow >= ExpiresIn)
             {
                 await RefreshAccessToken();
             }
@@ -63,7 +63,21 @@ public class NetatmoService : BackgroundService
             var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
 
             var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Try refreshing again.
+                await RefreshAccessToken();
+                response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, BaseUrl));
+            }
+
             var netatmoResult = await response.Content.ReadFromJsonAsync<NetatmoApiResponse>(_options);
+
+            if (netatmoResult == null || netatmoResult.Body == null || !netatmoResult.Body.Any())
+            {
+                _logger.LogError($"Failed to fetch netatmo readings with reason: {await response.Content.ReadAsStringAsync()}");
+                return;
+            }
 
             var sensorReadings = netatmoResult.ToMongoSensorReadings();
 
@@ -106,7 +120,7 @@ public class NetatmoService : BackgroundService
 
             NetatmoAccessToken = refreshResult.AccessToken;
             NetatmoRefreshToken = refreshResult.RefreshToken;
-            ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn);
+            ExpiresIn = DateTime.UtcNow.AddSeconds(refreshResult.ExpiresIn - 60); // Refresh earlier.
 
             _logger.LogInformation("Successfully refreshed access token. Expires in {ExpiresIn}", ExpiresIn);
         }
