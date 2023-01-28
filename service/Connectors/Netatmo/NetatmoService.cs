@@ -30,8 +30,8 @@ public class NetatmoService : BackgroundService
         _httpClient = httpClient;
         _mongoClient = mongoClient;
         _logger = logger;
+
         _httpClient.DefaultRequestHeaders.Add("User-Agent", HttpUtility.UrlEncode("Heat-Islands Detection Uni Hamburg 6buck@informatik.uni-hamburg.de"));
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {NetatmoAccessToken}");
 
         _options = new JsonSerializerOptions();
         _options.PropertyNameCaseInsensitive = true;
@@ -60,15 +60,13 @@ public class NetatmoService : BackgroundService
 
             // Get result from api.
             // Includes all sensor readings of all sensors averaged over the last 5 min.
-            var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
-
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(GetSensorReadingsRequest());
 
             if (!response.IsSuccessStatusCode)
             {
                 // Try refreshing again.
                 await RefreshAccessToken();
-                response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, BaseUrl));
+                response = await _httpClient.SendAsync(GetSensorReadingsRequest());
             }
 
             var netatmoResult = await response.Content.ReadFromJsonAsync<NetatmoApiResponse>(_options);
@@ -129,6 +127,14 @@ public class NetatmoService : BackgroundService
             var responseBody = await refreshResponse.Content.ReadAsStringAsync();
             throw new Exception($"Failed to refresh access token for netatmo. {responseBody}");
         }
+    }
+
+    private HttpRequestMessage GetSensorReadingsRequest()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
+        request.Headers.Add("Authorization", $"Bearer {NetatmoAccessToken}");
+
+        return request;
     }
 }
 
