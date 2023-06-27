@@ -13,9 +13,9 @@ builder.Services.AddSingleton<MongoWrapper>();
 
 // Add services
 builder.Services.AddHttpClient();
-// Todo: add mongodb upload for sensor community
 builder.Services.AddHostedService<SensorCommunityService>();
 builder.Services.AddHostedService<NetatmoService>();
+builder.Services.AddHostedService<BlobStorageExporter>();
 
 // Add recurring jobs as workers
 
@@ -33,12 +33,6 @@ NetatmoService.NetatmoClientSecret = Environment.GetEnvironmentVariable("NETATMO
 if (NetatmoService.NetatmoAccessToken is null)
     throw new Exception("Failed to fetch environment variables.");
 
-Console.WriteLine("Getting env variables...");
-Console.WriteLine($"{nameof(NetatmoService.NetatmoAccessToken)}: {NetatmoService.NetatmoAccessToken}");
-Console.WriteLine($"{nameof(NetatmoService.NetatmoRefreshToken)}: {NetatmoService.NetatmoRefreshToken}");
-Console.WriteLine($"{nameof(NetatmoService.NetatmoClientId)}: {NetatmoService.NetatmoClientId}");
-Console.WriteLine($"{nameof(NetatmoService.NetatmoClientSecret)}: {NetatmoService.NetatmoClientSecret}");
-
 // Setup MongoDb
 var mongoUserPw = Environment.GetEnvironmentVariable("SENSOR_MONGODB_PW");
 
@@ -46,8 +40,9 @@ var settings = MongoClientSettings.FromConnectionString($"mongodb+srv://mongouse
 settings.ServerApi = new ServerApi(ServerApiVersion.V1);
 MongoConfig.MongoSettings = settings;
 
-// configure logging.
-
-// Todo: Add health check
+// Setup Azure BlobStorage
+var blobStorageConnectionString = Environment.GetEnvironmentVariable("AZURE_BLOB_STORAGE_CONNECTION_STRING");
+BlobStorageExporter.AzureBlobConnectionString = blobStorageConnectionString;
+BlobStorageExporter.ContainerName = "sensor-data";
 
 await app.RunAsync();
