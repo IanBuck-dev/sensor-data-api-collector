@@ -1,4 +1,3 @@
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
@@ -26,6 +25,24 @@ public class MongoWrapper
         var collection = _database.GetCollection<MongoDbTimeSeriesReading>("sensor_readings_timeseries");
 
         await collection.InsertManyAsync(sensorReadings);
+    }
+
+    public async Task<IEnumerable<MongoDbTimeSeriesReading>> GetSensorReadings()
+    {
+        _logger.LogInformation("Retrieving sensor readings from mongo db.");
+
+        var collection = _database.GetCollection<MongoDbTimeSeriesReading>("sensor_readings_timeseries");
+
+        return await collection.Find(_ => true).ToListAsync();
+    }
+
+    public async Task DeleteSensorReadings()
+    {
+        _logger.LogInformation("Starting to delete sensor readings from mongo db.");
+
+        var collection = _database.GetCollection<MongoDbTimeSeriesReading>("sensor_readings_timeseries");
+
+        await collection.DeleteManyAsync(_ => true);
     }
 }
 
