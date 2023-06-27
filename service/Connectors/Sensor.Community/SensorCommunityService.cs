@@ -67,10 +67,6 @@ public class SensorCommunityService : BackgroundService
         }
         catch (Exception ex)
         {
-            // Do not log exception on shutdown.
-            if (ex is OperationCanceledException)
-                throw;
-
             // Do not throw exceptions to keep the hosted service running.
             _logger.LogError(ex, "Error while processing sensor readings for sensor community collector.");
         }
